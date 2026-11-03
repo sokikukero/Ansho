@@ -5,971 +5,894 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>背诵本</title>
 <style>
-  :root{
-    --bg:#f5f6f8;
-    --panel:#ffffff;
-    --ink:#2b2f36;
-    --ink-2:#5c6470;
-    --ink-3:#9aa1ac;
-    --line:#e6e8ec;
-    --brand:#4f7cff;
-    --brand-soft:#eaf0ff;
-    --red:#e8604c;
-    --red-soft:#fdeeea;
-    --amber:#e8a33d;
-    --amber-soft:#fbf1dc;
-    --green:#3fb06a;
-    --green-soft:#e6f6ec;
-    --shadow:0 1px 2px rgba(20,24,35,.04),0 8px 24px rgba(20,24,35,.06);
-    --radius:16px;
-  }
-  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
-  html,body{margin:0;padding:0;}
-  body{
-    background:var(--bg);
-    color:var(--ink);
-    font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei","Segoe UI",Roboto,sans-serif;
-    font-size:15px;line-height:1.6;
-    min-height:100vh;
-    max-width:820px;margin:0 auto;
-    padding:0 0 40px;
-  }
-  button{font-family:inherit;font-size:inherit;cursor:pointer;border:none;background:none;color:inherit;}
-  input,textarea{font-family:inherit;font-size:inherit;color:inherit;}
-  .wrap{padding:16px 16px 0;}
-
-  /* ---------- 顶部 ---------- */
-  header.top{
-    position:sticky;top:0;z-index:30;
-    background:rgba(245,246,248,.92);
-    backdrop-filter:blur(10px);
-    padding:14px 16px 10px;
-    display:flex;align-items:center;gap:10px;
-  }
-  .top h1{font-size:19px;margin:0;font-weight:650;letter-spacing:.3px;}
-  .top .sub{font-size:12px;color:var(--ink-3);margin-top:1px;}
-  .top .spacer{flex:1;}
-  .icon-btn{
-    width:38px;height:38px;border-radius:12px;
-    display:flex;align-items:center;justify-content:center;
-    color:var(--ink-2);transition:.15s;
-  }
-  .icon-btn:active{background:var(--line);}
-  .icon-btn svg{width:20px;height:20px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;}
-
-  /* ---------- 通用卡片/按钮 ---------- */
-  .card{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);}
-  .btn{
-    display:inline-flex;align-items:center;justify-content:center;gap:6px;
-    padding:9px 14px;border-radius:11px;font-weight:600;transition:.15s;
-    background:var(--brand);color:#fff;
-  }
-  .btn:active{transform:scale(.97);}
-  .btn.ghost{background:var(--brand-soft);color:var(--brand);}
-  .btn.plain{background:#eef0f4;color:var(--ink-2);}
-  .btn.danger{background:var(--red-soft);color:var(--red);}
-  .btn:disabled{opacity:.45;cursor:not-allowed;}
-  .row{display:flex;align-items:center;gap:10px;}
-
-  /* ---------- 文件夹网格 ---------- */
-  .folders{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin-top:14px;}
-  .folder{
-    padding:16px 14px;min-height:104px;display:flex;flex-direction:column;
-    cursor:pointer;transition:.18s;position:relative;overflow:hidden;
-  }
-  .folder:active{transform:translateY(1px);background:#fbfcfe;}
-  .folder.go{animation:pop .22s ease;}
-  @keyframes pop{0%{transform:scale(.97);opacity:.85}100%{transform:scale(1);opacity:1}}
-  .folder .emoji{
-    font-size:30px;line-height:1;margin-bottom:10px;
-    filter:drop-shadow(0 2px 4px rgba(0,0,0,.08));
-  }
-  .folder .fname{font-weight:650;font-size:15px;word-break:break-all;}
-  .folder .fmeta{font-size:12px;color:var(--ink-3);margin-top:4px;}
-  .folder .fmenu{
-    position:absolute;top:8px;right:8px;width:30px;height:30px;
-    border-radius:50%;color:var(--ink-2);background:rgba(255,255,255,.55);
-    display:flex;align-items:center;justify-content:center;
-    box-shadow:0 1px 3px rgba(0,0,0,.06);z-index:2;
-    transition:.15s;
-  }
-  .folder .fmenu:active{background:var(--brand-soft);color:var(--brand);transform:scale(.92);}
-  .folder .fmenu svg{width:17px;height:17px;}
-  /* 菜单里的整行按钮 */
-  .acts.col{display:flex;flex-direction:column;gap:10px;margin-top:6px;}
-  .acts .left{justify-content:flex-start;text-align:left;width:100%;}
-  .fmenu-preview{display:flex;align-items:center;gap:14px;margin-bottom:18px;padding:10px 12px;
-    background:var(--bg);border:1px solid var(--line);border-radius:12px;}
-  .fmenu-preview .emoji-lg{font-size:34px;line-height:1;}
-  .fmenu-preview .fmenu-meta{font-size:12px;color:var(--ink-3);}
-  .folder-add{
-    border:1.5px dashed var(--line);background:transparent;box-shadow:none;
-    align-items:center;justify-content:center;text-align:center;color:var(--ink-3);
-  }
-  .folder-add svg{width:22px;height:22px;stroke:currentColor;stroke-width:2;fill:none;margin-bottom:6px;}
-  .folder-add span{font-size:13px;font-weight:600;}
-
-  /* ---------- 文章页 ---------- */
-  .bar{
-    display:flex;align-items:center;gap:10px;padding:12px 16px;
-    background:rgba(245,246,248,.92);backdrop-filter:blur(10px);
-    position:sticky;top:0;z-index:25;
-  }
-  .bar .title{font-weight:650;font-size:16px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
-  .bar .title small{display:block;font-weight:400;font-size:11px;color:var(--ink-3);}
-  .bar .grow{flex:1;}
-
-  .toolbar{display:flex;gap:8px;padding:10px 16px;flex-wrap:wrap;align-items:center;}
-  .search{
-    flex:1;min-width:140px;position:relative;
-  }
-  .search input{
-    width:100%;padding:9px 12px 9px 34px;border-radius:11px;
-    border:1px solid var(--line);background:#fff;outline:none;transition:.15s;
-  }
-  .search input:focus{border-color:var(--brand);}
-  .search svg{position:absolute;left:11px;top:50%;transform:translateY(-50%);width:16px;height:16px;stroke:var(--ink-3);fill:none;stroke-width:2;}
-  .seg{display:flex;background:#eef0f4;padding:3px;border-radius:11px;gap:2px;}
-  .seg button{padding:6px 11px;border-radius:9px;font-size:13px;font-weight:600;color:var(--ink-2);transition:.15s;}
-  .seg button.on{background:#fff;color:var(--brand);box-shadow:0 1px 3px rgba(20,24,35,.1);}
-
-  .articles{padding:4px 16px 24px;display:flex;flex-direction:column;gap:10px;}
-  .article{
-    padding:13px 14px;display:flex;align-items:center;gap:12px;cursor:pointer;transition:.15s;
-  }
-  .article:active{transform:scale(.995);}
-  .article.selected{outline:2px solid var(--brand);outline-offset:-2px;background:var(--brand-soft);}
-  .article .chk:active{transform:scale(.88);}
-  .article.selected .chk{box-shadow:0 0 0 3px var(--brand-soft);}
-  .chk{
-    width:22px;height:22px;border-radius:7px;border:1.5px solid var(--line);
-    flex:none;display:flex;align-items:center;justify-content:center;background:#fff;
-  }
-  .chk.on{background:var(--brand);border-color:var(--brand);}
-  .chk.on svg{width:14px;height:14px;stroke:#fff;fill:none;stroke-width:2.5;stroke-linecap:round;stroke-linejoin:round;}
-  .a-body{flex:1;min-width:0;}
-  .a-name{font-weight:600;font-size:15px;word-break:break-all;}
-  .a-date{font-size:12px;color:var(--ink-3);margin-top:2px;}
-  .dot{
-    width:34px;height:34px;border-radius:50%;flex:none;
-    display:flex;align-items:center;justify-content:center;
-    font-size:12px;font-weight:700;
-    /* 熟练度数字统一白色，辨识度更高 */
-    color:#fff;
-    background:#fff;border:2px solid #e3e6ec;
-  }
-  .dot.l1{background:var(--red);border-color:#f6c3b8;}
-  .dot.l2{background:var(--amber);border-color:#f3d69a;}
-  .dot.l3{background:var(--green);border-color:#a9e0bd;}
-  /* lvl0（熟练度 0）：灰底白字，保持与其他层级一致的白色数字 */
-  .dot.l0{background:#c7ccd6;border-color:#c7ccd6;}
-
-  .fab{
-    position:fixed;left:50%;bottom:22px;transform:translateX(-50%);
-    background:var(--brand);color:#fff;padding:13px 26px;border-radius:999px;
-    font-weight:700;box-shadow:0 8px 24px rgba(79,124,255,.4);z-index:40;
-  }
-  .batchbar{
-    position:fixed;left:50%;bottom:22px;transform:translateX(-50%);
-    background:var(--panel);border:1px solid var(--line);border-radius:999px;
-    padding:8px 10px;box-shadow:var(--shadow);z-index:40;display:flex;gap:8px;align-items:center;
-  }
-  .batchbar .n{font-size:13px;color:var(--ink-2);padding:0 6px;font-weight:600;}
-  .empty{text-align:center;color:var(--ink-3);padding:60px 20px;font-size:14px;}
-  .empty .big{font-size:34px;margin-bottom:10px;}
-
-  /* ---------- 编辑器 ---------- */
-  .editor{padding:6px 16px 120px;}
-  .etitle{
-    width:100%;padding:10px 12px;border-radius:11px;border:1px solid var(--line);
-    background:#fff;font-weight:650;font-size:17px;outline:none;margin-bottom:10px;
-  }
-  .etitle:focus{border-color:var(--brand);}
-  .ed-box{
-    width:100%;min-height:220px;padding:14px;border-radius:13px;border:1px solid var(--line);
-    background:#fff;outline:none;line-height:1.85;white-space:pre-wrap;word-break:break-word;
-  }
-  .ed-box:focus{border-color:var(--brand);}
-  .ed-box .hl{color:var(--red);font-weight:600;}
-  .hint{font-size:12px;color:var(--ink-3);padding:0 2px 8px;}
-
-  /* ---------- 复习 ---------- */
-  .review{padding:6px 16px 120px;}
-  .rcard{
-    background:#fff;border:1px solid var(--line);border-radius:13px;
-    padding:16px 18px;line-height:2;font-size:16px;word-break:break-word;white-space:pre-wrap;
-  }
-  .mask{
-    background:var(--red);color:transparent;border-radius:6px;
-    padding:0 4px;margin:0 1px;cursor:pointer;user-select:none;
-    transition:color .12s,background .12s;
-  }
-  .mask.reveal{background:var(--red-soft);color:var(--red);}
-  .mask.null{background:transparent;color:inherit;cursor:default;}
-  .rev-head{font-size:12px;color:var(--ink-3);padding:2px 2px 10px;display:flex;gap:10px;align-items:center;}
-  .rev-head .pill{background:var(--brand-soft);color:var(--brand);padding:3px 10px;border-radius:999px;font-weight:600;font-size:12px;}
-  .rev-head .pill.g{background:var(--green-soft);color:var(--green);}
-
-  /* ---------- 弹窗 ---------- */
-  .scrim{
-    position:fixed;inset:0;background:rgba(20,24,35,.4);z-index:60;
-    display:flex;align-items:flex-end;justify-content:center;
-  }
-  .sheet{
-    background:#fff;width:100%;max-width:820px;border-radius:20px 20px 0 0;
-    padding:20px 18px calc(20px + env(safe-area-inset-bottom));
-    animation:up .22s ease;
-  }
-  @keyframes up{from{transform:translateY(40px);opacity:.4;}}
-  .sheet h2{margin:0 0 14px;font-size:17px;}
-  .field label{display:block;font-size:12px;color:var(--ink-3);margin-bottom:6px;}
-  .field input{
-    width:100%;padding:11px 12px;border-radius:11px;border:1px solid var(--line);outline:none;background:#fafbfc;
-  }
-  .field input:focus{border-color:var(--brand);}
-  .emoji-grid{display:flex;flex-wrap:wrap;gap:8px;margin-top:4px;}
-  .emoji-grid button{
-    width:40px;height:40px;border-radius:11px;border:1.5px solid var(--line);
-    font-size:21px;display:flex;align-items:center;justify-content:center;background:#fff;transition:.12s;
-  }
-  .emoji-grid button.on{background:var(--brand-soft);border-color:var(--brand);transform:scale(1.08);}
-  .sheet .acts{display:flex;gap:10px;margin-top:18px;}
-  .sheet .acts .btn{flex:1;}
-  .toast{
-    position:fixed;left:50%;bottom:90px;transform:translateX(-50%);
-    background:rgba(30,34,42,.92);color:#fff;padding:10px 18px;border-radius:999px;
-    font-size:13px;z-index:99;box-shadow:0 6px 20px rgba(0,0,0,.2);
-    animation:fade .25s ease;
-  }
-  @keyframes fade{from{opacity:0;transform:translate(-50%,12px);}}
-  .warn{font-size:12px;color:var(--red);margin-top:8px;display:none;}
-    @media(min-width:600px){
-    .scrim{align-items:center;}
-    .sheet{border-radius:18px;max-width:420px;}
-  }
+:root{
+--bg:#f5f6f8;
+--panel:#ffffff;
+--ink:#2b2f36;
+--ink-2:#5c6470;
+--ink-3:#9aa1ac;
+--line:#e6e8ec;
+--brand:#4f7cff;
+--brand-soft:#eaf0ff;
+--red:#e8604c;
+--red-soft:#fdeeea;
+--amber:#e8a33d;
+--amber-soft:#fbf1dc;
+--green:#3fb06a;
+--green-soft:#e6f6ec;
+--shadow:0 1px 2px rgba(20,24,35,.04),0 8px 24px rgba(20,24,35,.06);
+--radius:16px;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+html,body{margin:0;padding:0;}
+body{
+background:var(--bg);
+color:var(--ink);
+font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei","Segoe UI",Roboto,sans-serif;
+font-size:15px;line-height:1.6;
+min-height:100vh;
+max-width:820px;margin:0 auto;
+padding:0 0 40px;
+}
+button{font-family:inherit;font-size:inherit;cursor:pointer;border:none;background:none;color:inherit;}
+input,textarea{font-family:inherit;font-size:inherit;color:inherit;}
+.wrap{padding:16px 16px 0;}
+/* ---------- 顶部 ---------- */
+header.top{
+position:sticky;top:0;z-index:30;
+background:rgba(245,246,248,.92);
+backdrop-filter:blur(10px);
+padding:14px 16px 10px;
+display:flex;align-items:center;gap:10px;
+}
+.top h1{font-size:19px;margin:0;font-weight:650;letter-spacing:.3px;}
+.top .sub{font-size:12px;color:var(--ink-3);margin-top:1px;}
+.top .spacer{flex:1;}
+.icon-btn{
+width:38px;height:38px;border-radius:12px;
+display:flex;align-items:center;justify-content:center;
+color:var(--ink-2);transition:.15s;
+}
+.icon-btn:active{background:var(--line);}
+.icon-btn svg{width:20px;height:20px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;}
+/* ---------- 通用卡片/按钮 ---------- */
+.card{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);}
+.btn{
+display:inline-flex;align-items:center;justify-content:center;gap:6px;
+padding:9px 14px;border-radius:11px;font-weight:600;transition:.15s;
+background:var(--brand);color:#fff;
+}
+.btn:active{transform:scale(.97);}
+.btn.ghost{background:var(--brand-soft);color:var(--brand);}
+.btn.plain{background:#eef0f4;color:var(--ink-2);}
+.btn.danger{background:var(--red-soft);color:var(--red);}
+.btn:disabled{opacity:.45;cursor:not-allowed;}
+.row{display:flex;align-items:center;gap:10px;}
+/* ---------- 文件夹网格 ---------- */
+.folders{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin-top:14px;}
+.folder{
+padding:16px 14px;min-height:104px;display:flex;flex-direction:column;
+cursor:pointer;transition:.18s;position:relative;overflow:hidden;
+}
+.folder:active{transform:translateY(1px);background:#fbfcfe;}
+.folder.go{animation:pop .22s ease;}
+@keyframes pop{0%{transform:scale(.97);opacity:.85}100%{transform:scale(1);opacity:1}}
+.folder .emoji{
+font-size:30px;line-height:1;margin-bottom:10px;
+filter:drop-shadow(0 2px 4px rgba(0,0,0,.08));
+}
+.folder .fname{font-weight:650;font-size:15px;word-break:break-all;}
+.folder .fmeta{font-size:12px;color:var(--ink-3);margin-top:4px;}
+.folder .fmenu{
+position:absolute;top:8px;right:8px;width:30px;height:30px;
+border-radius:50%;color:var(--ink-2);background:rgba(255,255,255,.55);
+display:flex;align-items:center;justify-content:center;
+box-shadow:0 1px 3px rgba(0,0,0,.06);z-index:2;
+transition:.15s;
+}
+.folder .fmenu:active{background:var(--brand-soft);color:var(--brand);transform:scale(.92);}
+.folder .fmenu svg{width:17px;height:17px;}
+/* 菜单里的整行按钮 */
+.acts.col{display:flex;flex-direction:column;gap:10px;margin-top:6px;}
+.acts .left{justify-content:flex-start;text-align:left;width:100%;}
+.fmenu-preview{display:flex;align-items:center;gap:14px;margin-bottom:18px;padding:10px 12px;
+background:var(--bg);border:1px solid var(--line);border-radius:12px;}
+.fmenu-preview .emoji-lg{font-size:34px;line-height:1;}
+.fmenu-preview .fmenu-meta{font-size:12px;color:var(--ink-3);}
+.folder-add{
+border:1.5px dashed var(--line);background:transparent;box-shadow:none;
+align-items:center;justify-content:center;text-align:center;color:var(--ink-3);
+}
+.folder-add svg{width:22px;height:22px;stroke:currentColor;stroke-width:2;fill:none;margin-bottom:6px;}
+.folder-add span{font-size:13px;font-weight:600;}
+/* ---------- 文章页 ---------- */
+.bar{
+display:flex;align-items:center;gap:10px;padding:12px 16px;
+background:rgba(245,246,248,.92);backdrop-filter:blur(10px);
+position:sticky;top:0;z-index:25;
+}
+.bar .title{font-weight:650;font-size:16px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.bar .title small{display:block;font-weight:400;font-size:11px;color:var(--ink-3);}
+.bar .grow{flex:1;}
+.toolbar{display:flex;gap:8px;padding:10px 16px;flex-wrap:wrap;align-items:center;}
+.search{
+flex:1;min-width:140px;position:relative;
+}
+.search input{
+width:100%;padding:9px 12px 9px 34px;border-radius:11px;
+border:1px solid var(--line);background:#fff;outline:none;transition:.15s;
+}
+.search input:focus{border-color:var(--brand);}
+.search svg{position:absolute;left:11px;top:50%;transform:translateY(-50%);width:16px;height:16px;stroke:var(--ink-3);fill:none;stroke-width:2;}
+.seg{display:flex;background:#eef0f4;padding:3px;border-radius:11px;gap:2px;}
+.seg button{padding:6px 11px;border-radius:9px;font-size:13px;font-weight:600;color:var(--ink-2);transition:.15s;}
+.seg button.on{background:#fff;color:var(--brand);box-shadow:0 1px 3px rgba(20,24,35,.1);}
+.articles{padding:4px 16px 24px;display:flex;flex-direction:column;gap:10px;}
+.article{
+padding:13px 14px;display:flex;align-items:center;gap:12px;cursor:pointer;transition:.15s;
+}
+.article:active{transform:scale(.995);}
+.article.selected{outline:2px solid var(--brand);outline-offset:-2px;background:var(--brand-soft);}
+.article .chk:active{transform:scale(.88);}
+.article.selected .chk{box-shadow:0 0 0 3px var(--brand-soft);}
+.chk{
+width:22px;height:22px;border-radius:7px;border:1.5px solid var(--line);
+flex:none;display:flex;align-items:center;justify-content:center;background:#fff;
+}
+.chk.on{background:var(--brand);border-color:var(--brand);}
+.chk.on svg{width:14px;height:14px;stroke:#fff;fill:none;stroke-width:2.5;stroke-linecap:round;stroke-linejoin:round;}
+.a-body{flex:1;min-width:0;}
+.a-name{font-weight:600;font-size:15px;word-break:break-all;}
+.a-date{font-size:12px;color:var(--ink-3);margin-top:2px;}
+.dot{
+width:34px;height:34px;border-radius:50%;flex:none;
+display:flex;align-items:center;justify-content:center;
+font-size:12px;font-weight:700;
+color:#fff;
+background:#fff;border:2px solid #e3e6ec;
+}
+.dot.l1{background:var(--red);border-color:#f6c3b8;}
+.dot.l2{background:var(--amber);border-color:#f3d69a;}
+.dot.l3{background:var(--green);border-color:#a9e0bd;}
+.dot.l0{background:#c7ccd6;border-color:#c7ccd6;}
+.fab{
+position:fixed;left:50%;bottom:22px;transform:translateX(-50%);
+background:var(--brand);color:#fff;padding:13px 26px;border-radius:999px;
+font-weight:700;box-shadow:0 8px 24px rgba(79,124,255,.4);z-index:40;
+}
+.batchbar{
+position:fixed;left:50%;bottom:22px;transform:translateX(-50%);
+background:var(--panel);border:1px solid var(--line);border-radius:999px;
+padding:8px 10px;box-shadow:var(--shadow);z-index:40;display:flex;gap:8px;align-items:center;
+}
+.batchbar .n{font-size:13px;color:var(--ink-2);padding:0 6px;font-weight:600;}
+.empty{text-align:center;color:var(--ink-3);padding:60px 20px;font-size:14px;}
+.empty .big{font-size:34px;margin-bottom:10px;}
+/* ---------- 编辑器 ---------- */
+.editor{padding:6px 16px 120px;}
+.etitle{
+width:100%;padding:10px 12px;border-radius:11px;border:1px solid var(--line);
+background:#fff;font-weight:650;font-size:17px;outline:none;margin-bottom:10px;
+}
+.etitle:focus{border-color:var(--brand);}
+.ed-box{
+width:100%;min-height:220px;padding:14px;border-radius:13px;border:1px solid var(--line);
+background:#fff;outline:none;line-height:1.85;white-space:pre-wrap;word-break:break-word;
+}
+.ed-box:focus{border-color:var(--brand);}
+.ed-box .hl{color:var(--red);font-weight:600;}
+.hint{font-size:12px;color:var(--ink-3);padding:0 2px 8px;}
+/* ---------- 复习 ---------- */
+.review{padding:6px 16px 120px;}
+.rcard{
+background:#fff;border:1px solid var(--line);border-radius:13px;
+padding:16px 18px;line-height:2;font-size:16px;word-break:break-word;white-space:pre-wrap;
+}
+.mask{
+background:var(--red);color:transparent;border-radius:6px;
+padding:0 4px;margin:0 1px;cursor:pointer;user-select:none;
+transition:color .12s,background .12s;
+}
+.mask.reveal{background:var(--red-soft);color:var(--red);}
+.mask.null{background:transparent;color:inherit;cursor:default;}
+.rev-head{font-size:12px;color:var(--ink-3);padding:2px 2px 10px;display:flex;gap:10px;align-items:center;}
+.rev-head .pill{background:var(--brand-soft);color:var(--brand);padding:3px 10px;border-radius:999px;font-weight:600;font-size:12px;}
+.rev-head .pill.g{background:var(--green-soft);color:var(--green);}
+/* ---------- 弹窗 ---------- */
+.scrim{
+position:fixed;inset:0;background:rgba(20,24,35,.4);z-index:60;
+display:flex;align-items:flex-end;justify-content:center;
+}
+.sheet{
+background:#fff;width:100%;max-width:820px;border-radius:20px 20px 0 0;
+padding:20px 18px calc(20px + env(safe-area-inset-bottom));
+animation:up .22s ease;
+}
+@keyframes up{from{transform:translateY(40px);opacity:.4;}}
+.sheet h2{margin:0 0 14px;font-size:17px;}
+.field label{display:block;font-size:12px;color:var(--ink-3);margin-bottom:6px;}
+.field input{
+width:100%;padding:11px 12px;border-radius:11px;border:1px solid var(--line);outline:none;background:#fafbfc;
+}
+.field input:focus{border-color:var(--brand);}
+.emoji-grid{display:flex;flex-wrap:wrap;gap:8px;margin-top:4px;}
+.emoji-grid button{
+width:40px;height:40px;border-radius:11px;border:1.5px solid var(--line);
+font-size:21px;display:flex;align-items:center;justify-content:center;background:#fff;transition:.12s;
+}
+.emoji-grid button.on{background:var(--brand-soft);border-color:var(--brand);transform:scale(1.08);}
+.sheet .acts{display:flex;gap:10px;margin-top:18px;}
+.sheet .acts .btn{flex:1;}
+.toast{
+position:fixed;left:50%;bottom:90px;transform:translateX(-50%);
+background:rgba(30,34,42,.92);color:#fff;padding:10px 18px;border-radius:999px;
+font-size:13px;z-index:99;box-shadow:0 6px 20px rgba(0,0,0,.2);
+animation:fade .25s ease;
+}
+@keyframes fade{from{opacity:0;transform:translate(-50%,12px);}}
+.warn{font-size:12px;color:var(--red);margin-top:8px;display:none;}
+@media(min-width:600px){
+.scrim{align-items:center;}
+.sheet{border-radius:18px;max-width:420px;}
+}
 </style>
 </head>
 <body>
-
 <!-- ============ 主页：文件夹列表 ============ -->
 <header class="top">
-  <div>
-    <h1>背诵本</h1>
-    <div class="sub" id="topSub">— 个文件夹 · — 篇文章</div>
-  </div>
-  <div class="spacer"></div>
-  <button class="icon-btn" id="btnImport" title="导入">
-    <svg viewBox="0 0 24 24"><path d="M12 3v12"/><path d="M7 8l5-5 5 5"/><path d="M4 21h16"/></svg>
-  </button>
-  <button class="icon-btn" id="btnExport" title="导出">
-    <svg viewBox="0 0 24 24"><path d="M12 3v12"/><path d="M7 13l5 5 5-5"/><path d="M4 21h16"/></svg>
-  </button>
-</header>
-
-<div class="wrap">
-  <div class="folders" id="folderList"></div>
+<div>
+<h1>背诵本</h1>
+<div class="sub" id="topSub">— 个文件夹 · — 篇文章</div>
 </div>
-
+<div class="spacer"></div>
+<button class="icon-btn" id="btnImport" title="导入">
+<svg viewBox="0 0 24 24"><path d="M12 3v12"/><path d="M7 8l5-5 5 5"/><path d="M4 21h16"/></svg>
+</button>
+<button class="icon-btn" id="btnExport" title="导出">
+<svg viewBox="0 0 24 24"><path d="M12 3v12"/><path d="M7 13l5 5 5-5"/><path d="M4 21h16"/></svg>
+</button>
+</header>
+<div class="wrap">
+<div class="folders" id="folderList"></div>
+</div>
 <!-- ============ 文章列表页 ============ -->
 <div id="listView" style="display:none;">
-  <div class="bar">
-    <button class="icon-btn" id="listBack"><svg viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg></button>
-    <div class="title" id="listTitle">文件夹<small id="listCount"></small></div>
-    <div class="grow"></div>
-    <button class="icon-btn" id="listSelect" title="批量选择"><svg viewBox="0 0 24 24"><rect x="4" y="4" width="16" height="16" rx="3"/></svg></button>
-  </div>
-
-  <div class="toolbar">
-    <div class="search">
-      <svg viewBox="0 0 24 24" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>
-      <input id="searchInput" placeholder="搜索文章名…">
-    </div>
-    <div class="seg" id="sortSeg">
-      <button data-sort="name-asc" class="">名称 ↑</button>
-      <button data-sort="prof-desc" class="on">熟练 ↓</button>
-      <button data-sort="prof-asc" class="">熟练 ↑</button>
-    </div>
-  </div>
-
-  <div class="articles" id="articleList"></div>
-
-  <button class="fab" id="fabNew">＋ 新建文章</button>
-
-  <div class="batchbar" id="batchbar" style="display:none;">
-    <span class="n" id="batchNum">已选 0</span>
-    <button class="btn danger" id="batchDel">删除</button>
-    <button class="btn plain" id="batchCancel">取消</button>
-  </div>
+<div class="bar">
+<button class="icon-btn" id="listBack"><svg viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg></button>
+<div class="title" id="listTitle">文件夹<small id="listCount"></small></div>
+<div class="grow"></div>
+<button class="icon-btn" id="listSelect" title="批量选择"><svg viewBox="0 0 24 24"><rect x="4" y="4" width="16" height="16" rx="3"/></svg></button>
 </div>
-
+<div class="toolbar">
+<div class="search">
+<svg viewBox="0 0 24 24" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>
+<input id="searchInput" placeholder="搜索文章名…">
+</div>
+<div class="seg" id="sortSeg">
+<button data-sort="name-asc" class="">名称 ↑</button>
+<button data-sort="prof-desc" class="on">熟练 ↓</button>
+<button data-sort="prof-asc" class="">熟练 ↑</button>
+</div>
+</div>
+<div class="articles" id="articleList"></div>
+<button class="fab" id="fabNew">＋ 新建文章</button>
+<div class="batchbar" id="batchbar" style="display:none;">
+<span class="n" id="batchNum">已选 0</span>
+<button class="btn danger" id="batchDel">删除</button>
+<button class="btn plain" id="batchCancel">取消</button>
+</div>
+</div>
 <!-- ============ 编辑器页 ============ -->
 <div id="editView" style="display:none;">
-  <div class="bar">
-    <button class="icon-btn" id="editBack"><svg viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg></button>
-    <div class="title" id="editFolderName">文件夹</div>
-    <div class="grow"></div>
-    <button class="btn ghost" id="enterReview">开始复习</button>
-  </div>
-  <div class="editor">
-    <input class="etitle" id="editTitle" placeholder="文章标题">
-    <div class="hint">以 <b>//</b> 开头的自然段会被标红；复习时会变成红块遮住，点一下揭开。</div>
-    <div class="ed-box" id="editBox" contenteditable="true" spellcheck="false"></div>
-  </div>
+<div class="bar">
+<button class="icon-btn" id="editBack"><svg viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg></button>
+<div class="title" id="editFolderName">文件夹</div>
+<div class="grow"></div>
+<button class="btn ghost" id="enterReview">开始复习</button>
 </div>
-
+<div class="editor">
+<input class="etitle" id="editTitle" placeholder="文章标题">
+<div class="hint">以 <b>//</b> 开头的自然段会被标红；复习时会变成红块遮住，点一下揭开。</div>
+<div class="ed-box" id="editBox" contenteditable="true" spellcheck="false"></div>
+</div>
+</div>
 <!-- ============ 复习页 ============ -->
 <div id="reviewView" style="display:none;">
-  <div class="bar">
-    <button class="btn plain" id="revBack" style="padding:8px 14px;">← 返回</button>
-    <div class="title" id="revTitle">复习</div>
-    <div class="grow"></div>
-    <button class="btn" id="revDone">完成 ✓</button>
-  </div>
-  <div class="review">
-    <div class="rev-head">
-      <span class="pill" id="revPill">0 / 0 已揭开</span>
-      <span id="revTip">点红块查看，再点重新盖住</span>
-    </div>
-    <div class="rcard" id="revCard"></div>
-  </div>
+<div class="bar">
+<button class="btn plain" id="revBack" style="padding:8px 14px;">← 返回</button>
+<div class="title" id="revTitle">复习</div>
+<div class="grow"></div>
+<button class="btn" id="revDone">完成 ✓</button>
 </div>
-
+<div class="review">
+<div class="rev-head">
+<span class="pill" id="revPill">0 / 0 已揭开</span>
+<span id="revTip">点红块查看，再点重新盖住</span>
+</div>
+<div class="rcard" id="revCard"></div>
+</div>
+</div>
 <!-- ============ 通用弹窗 ============ -->
 <div class="scrim" id="scrim" style="display:none;">
-  <div class="sheet" id="sheet">
-    <h2 id="sheetTitle">标题</h2>
-    <div id="sheetBody"></div>
-  </div>
+<div class="sheet" id="sheet">
+<h2 id="sheetTitle">标题</h2>
+<div id="sheetBody"></div>
 </div>
-
+</div>
 <script>
 /* =========================================================
-   数据层
-   store = { folders:[ {id,name,emoji,articles:[ {id,name,body,proficiency,lastReview,created} ]} ] }
-   熟练度 level: 0 白 / 1-3 红 / 4-6 黄 / 7+ 绿
-   lastReview: 'YYYY-MM-DD' 字符串
+数据层
+store = { folders:[ {id,name,emoji,articles:[ {id,name,body,proficiency,lastReview,created} ]} ] }
+熟练度 level: 0 白 / 1-3 红 / 4-6 黄 / 7+ 绿
+lastReview: 'YYYY-MM-DD' 字符串
 ========================================================= */
 const KEY = 'beisongben_v1';
 const EMOJIS = ['📖','📚','🗂️','✏️','🧠','🌱','🌸','🍀','⭐','🔥','💡','🎯','📝','🗒️','🧩','🎓','📜','🌙','☀️','🍵','🎨','🎵','⚡','🧸'];
 const today = () => new Date().toISOString().slice(0,10);
 const uid = p => p ? (p.id ?? p) : 'id' + Date.now().toString(36) + Math.random().toString(36).slice(2,6);
 const esc = s => String(s).replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]));
-
-/* 数据层：单一真相源。任何写操作都必须走 save()。
-   persist() 落盘到 localStorage；save() = 先修正派生状态再落盘。
-   页面可见性变化 / 切到后台时也落一次，彻底杜绝“退出就没了”。 */
 let store = blankStore();
 function blankStore(){ return { folders: [] }; }
 function persist(){ try{ localStorage.setItem(KEY, JSON.stringify(store)); }catch(e){} }
 function save(){
-  store.folders = (store.folders||[]).map(f=>({ emoji:'📖', articles:[], ...f,
-    articles:(f.articles||[]).map(a=>({ proficiency:0, lastReview:'', created:today(), ...a })) }));
-  persist();
+store.folders = (store.folders||[]).map(f=>({ emoji:'📖', articles:[], ...f,
+articles:(f.articles||[]).map(a=>({ proficiency:0, lastReview:'', created:today(), ...a })) }));
+persist();
 }
 function load(){
-  try{ const t=localStorage.getItem(KEY); if(t){ store=normalize(t); } }
-  catch(e){ store=blankStore(); }
-  if(!store || !Array.isArray(store.folders)) store=blankStore();
-  save();
+try{ const t=localStorage.getItem(KEY); if(t){ store=normalize(t); } }
+catch(e){ store=blankStore(); }
+if(!store || !Array.isArray(store.folders)) store=blankStore();
+save();
 }
-/* 把任意来源的数据统一洗成当前版本结构（导入 / 旧版迁移都走这里） */
 function normalize(d){
-  const o = (typeof d==='string') ? (function(){ try{return JSON.parse(d);}catch(e){return null;} })() : d;
-  if(!o || !Array.isArray(o.folders)) return blankStore();
-  o.folders = o.folders.map(f=>({ id:uid(f), name:f.name||'未命名', emoji:f.emoji||'📖',
-    articles:(f.articles||[]).map(a=>({ id:uid(a), name:a.name||'无标题', body:a.body||'',
-      proficiency:(+a.proficiency||0), lastReview:a.lastReview||'', created:a.created||today() })) }));
-  return o;
+const o = (typeof d==='string') ? (function(){ try{return JSON.parse(d);}catch(e){return null;} })() : d;
+if(!o || !Array.isArray(o.folders)) return blankStore();
+o.folders = o.folders.map(f=>({ id:uid(f), name:f.name||'未命名', emoji:f.emoji||'📖',
+articles:(f.articles||[]).map(a=>({ id:uid(a), name:a.name||'无标题', body:a.body||'',
+proficiency:(+a.proficiency||0), lastReview:a.lastReview||'', created:a.created||today() })) }));
+return o;
 }
-
-/* ---------- 熟练度视觉 ---------- */
 function level(p){
-  p = +p||0;
-  if(p<=0) return 0;
-  if(p<=3) return 1;
-  if(p<=6) return 2;
-  return 3;
+p = +p||0;
+if(p<=0) return 0;
+if(p<=3) return 1;
+if(p<=6) return 2;
+return 3;
 }
 function dotHTML(p){
-  const lvl = level(p), n = (+p||0);
-  // lvl0 也加 l0 类，配合白色数字样式
-  const cls = lvl===0?'l0':(lvl===1?'l1':lvl===2?'l2':'l3');
-  const txt = n>99?'99+':n;
-  return `<div class="dot ${cls}" title="熟练度 ${n}">${txt}</div>`;
+const lvl = level(p), n = (+p||0);
+const cls = lvl===0?'l0':(lvl===1?'l1':lvl===2?'l2':'l3');
+const txt = n>99?'99+':n;
+return `<div class="dot ${cls}" title="熟练度 ${n}">${txt}</div>`;
 }
-
 /* =========================================================
-   渲染：主页文件夹
+渲染：主页文件夹
 ========================================================= */
 function renderFolders(){
-  const box = document.getElementById('folderList');
-  let totalA = 0;
-  const cards = store.folders.map(f=>{
-    totalA += f.articles.length;
-    return `<div class="card folder" data-fid="${f.id}">
-      <button class="fmenu" data-act="menu" title="操作">
-        <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" fill="none" stroke-width="2.5"><circle cx="6" cy="12" r="1.6"/><circle cx="12" cy="12" r="1.6"/><circle cx="18" cy="12" r="1.6"/></svg>
-      </button>
-      <div class="emoji">${f.emoji}</div>
-      <div class="fname">${esc(f.name)}</div>
-      <div class="fmeta">${f.articles.length} 篇 · 平均 ${avgProf(f)}</div>
-    </div>`;
-  }).join('');
-  box.innerHTML = cards + `<div class="card folder folder-add" id="addFolder">
-      <svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>
-      <span>新建文件夹</span>
-    </div>`;
-  document.getElementById('topSub').textContent = `${store.folders.length} 个文件夹 · ${totalA} 篇文章`;
+const box = document.getElementById('folderList');
+let totalA = 0;
+const cards = store.folders.map(f=>{
+totalA += f.articles.length;
+return `<div class="card folder" data-fid="${f.id}">
+<button class="fmenu" data-act="menu" title="操作">
+<svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" fill="none" stroke-width="2.5"><circle cx="6" cy="12" r="1.6"/><circle cx="12" cy="12" r="1.6"/><circle cx="18" cy="12" r="1.6"/></svg>
+</button>
+<div class="emoji">${f.emoji}</div>
+<div class="fname">${esc(f.name)}</div>
+<div class="fmeta">${f.articles.length} 篇 · 平均 ${avgProf(f)}</div>
+</div>`;
+}).join('');
+box.innerHTML = cards + `<div class="card folder folder-add" id="addFolder">
+<svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>
+<span>新建文件夹</span>
+</div>`;
+document.getElementById('topSub').textContent = `${store.folders.length} 个文件夹 · ${totalA} 篇文章`;
 }
 function avgProf(f){
-  if(!f.articles.length) return '—';
-  const a = f.articles.reduce((s,x)=>s+(+x.proficiency||0),0)/f.articles.length;
-  return a.toFixed(a<1?1:0);
+if(!f.articles.length) return '—';
+const a = f.articles.reduce((s,x)=>s+(+x.proficiency||0),0)/f.articles.length;
+return a.toFixed(a<1?1:0);
 }
-
 /* =========================================================
-   文章列表
+文章列表
 ========================================================= */
 let ctx = { fid:null, sort:'prof-desc', kw:'', selecting:false, sel:new Set() };
 let curFolderId = null;
 function setCurFolder(id){ curFolderId = id; if(ctx) ctx.fid = id; }
 function openFolder(fid, fromCard){
-  curFolderId = fid; ctx.fid = fid; ctx.selecting = false; ctx.sel.clear(); ctx.kw='';
-  document.getElementById('searchInput').value='';
-  // 同步排序按钮的 active 态，保证渲染出的列表与工具栏指示一致，
-  // 不会出现“点进去什么都没有、要再点一次排序才显示”的空档
-  document.querySelectorAll('#sortSeg button').forEach(b=>{
-    b.classList.toggle('on', b.dataset.sort === ctx.sort);
-  });
-  if(fromCard){ const c = document.querySelector('.folder[data-fid="'+fid+'"]'); if(c){ c.classList.remove('go'); void c.offsetWidth; c.classList.add('go'); } }
-  document.getElementById('folderList').closest('.wrap').style.display='none';
-  document.getElementById('listView').style.display='block';
-  document.getElementById('editView').style.display='none';
-  document.getElementById('reviewView').style.display='none';
-  const f = folder(fid);
-  document.getElementById('listTitle').innerHTML = `${esc(f.name)}<small>${f.emoji} · ${f.articles.length} 篇</small>`;
-  document.getElementById('listCount').textContent='';
-  renderArticles();
-  window.scrollTo(0,0);
+curFolderId = fid; ctx.fid = fid; ctx.selecting = false; ctx.sel.clear(); ctx.kw='';
+document.getElementById('searchInput').value='';
+document.querySelectorAll('#sortSeg button').forEach(b=>{
+b.classList.toggle('on', b.dataset.sort === ctx.sort);
+});
+if(fromCard){ const c = document.querySelector('.folder[data-fid="'+fid+'"]'); if(c){ c.classList.remove('go'); void c.offsetWidth; c.classList.add('go'); } }
+document.getElementById('folderList').closest('.wrap').style.display='none';
+document.getElementById('listView').style.display='block';
+document.getElementById('editView').style.display='none';
+document.getElementById('reviewView').style.display='none';
+const f = folder(fid);
+document.getElementById('listTitle').innerHTML = `${esc(f.name)}<small>${f.emoji} · ${f.articles.length} 篇</small>`;
+document.getElementById('listCount').textContent='';
+renderArticles();
+window.scrollTo(0,0);
 }
 function folder(fid){ return store.folders.find(f=>f.id===fid); }
 function article(fid,aid){ const f=folder(fid); return f&&f.articles.find(a=>a.id===aid); }
-
 function renderArticles(){
-  const f = folder(ctx.fid);
-  const kw = ctx.kw.trim().toLowerCase();
-  let list = f.articles.filter(a=> !kw || (a.name||'').toLowerCase().includes(kw));
-  const s = ctx.sort;
-  list.sort((a,b)=>{
-    if(s==='name-asc') return (a.name||'').localeCompare(b.name||'','zh-Hans-CN');
-    const pa=+a.proficiency||0, pb=+b.proficiency||0;
-    return s==='prof-desc' ? pb-pa : pa-pb;
-  });
-  const box = document.getElementById('articleList');
-  if(!list.length){
-    box.innerHTML = `<div class="empty"><div class="big">${kw?'🔍':'📄'}</div>${kw?'没有匹配的文章':'这个文件夹还是空的<br>点下方按钮写下第一篇'}</div>`;
-  }else{
-    box.innerHTML = list.map(a=>{
-      const dateTxt = a.lastReview ? `最近复习 ${fmtDate(a.lastReview)}` : '尚未复习';
-      const sel = ctx.sel.has(a.id);
-      return `<div class="card article ${sel?'selected':''}" data-aid="${a.id}">
-        <div class="chk ${sel?'on':''}">${sel?'<svg viewBox="0 0 24 24"><path d="M4 12l5 5L20 6"/></svg>':''}</div>
-        <div class="a-body">
-          <div class="a-name">${esc(a.name||'无标题')}</div>
-          <div class="a-date">${dateTxt}</div>
-        </div>
-        ${dotHTML(a.proficiency)}
-      </div>`;
-    }).join('');
-  }
-  document.getElementById('fabNew').style.display = ctx.selecting ? 'none' : 'block';
-  const bb = document.getElementById('batchbar');
-  if(ctx.selecting){ bb.style.display='flex'; document.getElementById('batchNum').textContent='已选 '+ctx.sel.size; }
-  else bb.style.display='none';
+const f = folder(ctx.fid);
+const kw = ctx.kw.trim().toLowerCase();
+let list = f.articles.filter(a=> !kw || (a.name||'').toLowerCase().includes(kw));
+const s = ctx.sort;
+list.sort((a,b)=>{
+if(s==='name-asc') return (a.name||'').localeCompare(b.name||'','zh-Hans-CN');
+const pa=+a.proficiency||0, pb=+b.proficiency||0;
+return s==='prof-desc' ? pb-pa : pa-pb;
+});
+const box = document.getElementById('articleList');
+if(!list.length){
+box.innerHTML = `<div class="empty"><div class="big">${kw?'🔍':'📄'}</div>${kw?'没有匹配的文章':'这个文件夹还是空的<br>点下方按钮写下第一篇'}</div>`;
+}else{
+box.innerHTML = list.map(a=>{
+const dateTxt = a.lastReview ? `最近复习 ${fmtDate(a.lastReview)}` : '尚未复习';
+const sel = ctx.sel.has(a.id);
+return `<div class="card article ${sel?'selected':''}" data-aid="${a.id}">
+<div class="chk ${sel?'on':''}">${sel?'<svg viewBox="0 0 24 24"><path d="M4 12l5 5L20 6"/></svg>':''}</div>
+<div class="a-body">
+<div class="a-name">${esc(a.name||'无标题')}</div>
+<div class="a-date">${dateTxt}</div>
+</div>
+${dotHTML(a.proficiency)}
+</div>`;
+}).join('');
+}
+document.getElementById('fabNew').style.display = ctx.selecting ? 'none' : 'block';
+const bb = document.getElementById('batchbar');
+if(ctx.selecting){ bb.style.display='flex'; document.getElementById('batchNum').textContent='已选 '+ctx.sel.size; }
+else bb.style.display='none';
 }
 function fmtDate(s){
-  if(!s) return '';
-  const d = s.split('-');
-  return `${d[0]}.${d[1]}.${d[2]}`;
+if(!s) return '';
+const d = s.split('-');
+return `${d[0]}.${d[1]}.${d[2]}`;
 }
-
 /* =========================================================
-   编辑器
+编辑器
 ========================================================= */
 let editCtx = { fid:null, aid:null, dirty:false };
-/* ===== 编辑器 =====
-   设计铁律：任何时候都不重写正在编辑的 textContent，否则光标会被打回行首，
-   输入法连续输入直接断掉，表现为“打不出字 / // 不变红 / 像没保存”。
-   因此：
-   - markLine 只增删一个 'hl' class，纯 CSS 变红，O(1)，不打扰光标；
-   - commitBody 只【读】DOM，写回 article 对象并 save()，绝不回写 DOM；
-   - 只有在打开文章、粘贴多行、撤销到空 这类“结构变化”时才重绘整框，
-     重绘前先记住光标位置，画完再还原。 */
 function renderEditBox(body){
-  const box = document.getElementById('editBox');
-  const paras = parseBody(body);
-  const html = paras.map((pp,i)=>{
-    const txt = esc(pp.text);   // 原样保留 // 前缀，颜色交给 .hl
-    return `<div class="${pp.red?'hl':''}" data-i="${i}">${txt||'&nbsp;'}</div>`;
-  }).join('');
-  box.innerHTML = html || '<div data-i="0">&nbsp;</div>';
+const box = document.getElementById('editBox');
+const paras = parseBody(body);
+const html = paras.map((pp,i)=>{
+const txt = esc(pp.text);
+return `<div class="${pp.red?'hl':''}" data-i="${i}">${txt||'&nbsp;'}</div>`;
+}).join('');
+box.innerHTML = html || '<div data-i="0">&nbsp;</div>';
 }
-/* 只读：当前各段文本，不碰 DOM */
 function readLines(){
-  const box = document.getElementById('editBox');
-  return [...box.children].map(c=>(c.textContent==='\u00a0'?'':c.textContent)||'');
+const box = document.getElementById('editBox');
+return [...box.children].map(c=>(c.textContent==='\u00a0'?'':c.textContent)||'');
 }
-/* 把 DOM 里的文本写回数据层并落盘。全程不修改任何节点的文本，光标安全。 */
 function commitBody(){
-  const a = article(editCtx.fid,editCtx.aid);
-  if(!a) return;
-  a.body = readLines().join('\n');
-  a.name = document.getElementById('editTitle').value.trim() || '无标题';
-  save();
+const a = article(editCtx.fid,editCtx.aid);
+if(!a) return;
+a.body = readLines().join('\n');
+a.name = document.getElementById('editTitle').value.trim() || '无标题';
+save();
 }
 function parseBody(body){
-  return (body||'').split('\n').map(ln=>({ text:ln, red:/^\s*\/\//.test(ln) }));
+return (body||'').split('\n').map(ln=>({ text:ln, red:/^\s*\/\//.test(ln) }));
 }
-/* 输入时只判断本行要不要变红：class 切换，光标位置纹丝不动 */
 function markLine(el){
-  const on = /^\s*\/\//.test(el.textContent||'');
-  if(on !== el.classList.contains('hl')) el.classList.toggle('hl', on);
+const on = /^\s*\/\//.test(el.textContent||'');
+if(on !== el.classList.contains('hl')) el.classList.toggle('hl', on);
 }
-/* 记录 / 还原光标：仅在必须重绘整框时使用 */
 function saveCaret(){
-  const sel = window.getSelection();
-  if(!sel || sel.rangeCount===0) return null;
-  const rng = sel.getRangeAt(0), box = document.getElementById('editBox');
-  const node = rng.startContainer, off = rng.startOffset;
-  const line = node.nodeType===Node.TEXT_NODE ? node.parentNode.closest('[data-i]')
-           : node.closest ? node.closest('[data-i]') : null;
-  if(!line || !box.contains(line)) return null;
-  return { idx:[...box.children].indexOf(line), off, atEnd:rng.collapsed };
+const sel = window.getSelection();
+if(!sel || sel.rangeCount===0) return null;
+const rng = sel.getRangeAt(0), box = document.getElementById('editBox');
+const node = rng.startContainer, off = rng.startOffset;
+const line = node.nodeType===Node.TEXT_NODE ? node.parentNode.closest('[data-i]')
+: node.closest ? node.closest('[data-i]') : null;
+if(!line || !box.contains(line)) return null;
+return { idx:[...box.children].indexOf(line), off, atEnd:rng.collapsed };
 }
 function restoreCaret(c){
-  if(!c) return;
-  const box = document.getElementById('editBox');
-  const line = box.children[c.idx]; if(!line) return;
-  try{
-    const txt = line.firstChild || document.createTextNode('');
-    if(!line.firstChild) line.appendChild(txt);
-    const len = txt.length;
-    const rng = document.createRange(), sel = window.getSelection();
-    rng.setStart(txt, Math.min(c.off, len)); rng.collapse(true);
-    sel.removeAllRanges(); sel.addRange(rng);
-  }catch(e){}
+if(!c) return;
+const box = document.getElementById('editBox');
+const line = box.children[c.idx]; if(!line) return;
+try{
+const txt = line.firstChild || document.createTextNode('');
+if(!line.firstChild) line.appendChild(txt);
+const len = txt.length;
+const rng = document.createRange(), sel = window.getSelection();
+rng.setStart(txt, Math.min(c.off, len)); rng.collapse(true);
+sel.removeAllRanges(); sel.addRange(rng);
+}catch(e){}
 }
-/* 行级事件：input 只做高亮；blur / 换行 / 删除 / 粘贴 才 commit */
 function bindEditLines(){
-  const box = document.getElementById('editBox');
-  if(!box || box.dataset.bound) return; box.dataset.bound='1';
-  box.addEventListener('input', e=>{
-    const t = e.target;
-    if(t && t.dataset && 'i' in t.dataset){ markLine(t); commitBody(); }
-  });
-  box.addEventListener('compositionend', e=>{
-    const t = e.target;
-    if(t && t.dataset && 'i' in t.dataset){ markLine(t); commitBody(); }
-  });
-  box.addEventListener('blur', ()=>commitBody(), true);
-  box.addEventListener('keydown', e=>{
-    const cur = e.target;
-    if(!cur || !(cur.dataset && 'i' in cur.dataset)) return;
-    if(e.key==='Enter'){
-      e.preventDefault();
-      const idx = [...box.children].indexOf(cur);
-      const nxt = document.createElement('div'); nxt.dataset.i='p';
-      cur.after(nxt); markLine(cur); commitBody();
-      reindex(); markLine(nxt); nxt.focus();
-      // 新行内容为空，直接把光标挪进去
-      const rng=document.createRange(), sel=window.getSelection();
-      const tn=nxt.firstChild||document.createTextNode('');
-      if(!nxt.firstChild) nxt.appendChild(tn);
-      rng.setStart(tn,0); rng.collapse(true); sel.removeAllRanges(); sel.addRange(rng);
-    }else if(e.key==='Backspace'){
-      if(cur.textContent==='' || cur.textContent==='\u00a0'){
-        const prev = cur.previousElementSibling;
-        if(prev && box.children.length>1){
-          e.preventDefault();
-          cur.remove(); reindex(); markLine(prev); prev.focus(); commitBody();
-        }
-      }
-    }
-  });   // keydown 监听结束
-  box.addEventListener('paste', ()=>{
-    const c = saveCaret();
-    setTimeout(()=>{
-      // 粘贴可能带多行 / 富文本，按纯文本重切分段
-      const a = article(editCtx.fid,editCtx.aid);
-      const box = document.getElementById('editBox');
-      const flat = [...box.children].map(x=>(x.textContent==='\u00a0'?'':x.textContent)||'').join('\n');
-      a.body = flat;
-      renderEditBox(a.body); reindex(); restoreCaret(c); commitBody();
-    },0);
-  });
+const box = document.getElementById('editBox');
+if(!box || box.dataset.bound) return; box.dataset.bound='1';
+box.addEventListener('input', e=>{
+const t = e.target;
+if(t && t.dataset && 'i' in t.dataset){ markLine(t); commitBody(); }
+});
+box.addEventListener('compositionend', e=>{
+const t = e.target;
+if(t && t.dataset && 'i' in t.dataset){ markLine(t); commitBody(); }
+});
+box.addEventListener('blur', ()=>commitBody(), true);
+box.addEventListener('keydown', e=>{
+const cur = e.target;
+if(!cur || !(cur.dataset && 'i' in cur.dataset)) return;
+if(e.key==='Enter'){
+e.preventDefault();
+const idx = [...box.children].indexOf(cur);
+const nxt = document.createElement('div'); nxt.dataset.i='p';
+cur.after(nxt); markLine(cur); commitBody();
+reindex(); markLine(nxt); nxt.focus();
+const rng=document.createRange(), sel=window.getSelection();
+const tn=nxt.firstChild||document.createTextNode('');
+if(!nxt.firstChild) nxt.appendChild(tn);
+rng.setStart(tn,0); rng.collapse(true); sel.removeAllRanges(); sel.addRange(rng);
+}else if(e.key==='Backspace'){
+if(cur.textContent==='' || cur.textContent==='\u00a0'){
+const prev = cur.previousElementSibling;
+if(prev && box.children.length>1){
+e.preventDefault();
+cur.remove(); reindex(); markLine(prev); prev.focus(); commitBody();
+}
+}
+}
+});
+box.addEventListener('paste', ()=>{
+const c = saveCaret();
+setTimeout(()=>{
+const a = article(editCtx.fid,editCtx.aid);
+const box = document.getElementById('editBox');
+const flat = [...box.children].map(x=>(x.textContent==='\u00a0'?'':x.textContent)||'').join('\n');
+a.body = flat;
+renderEditBox(a.body); reindex(); restoreCaret(c); commitBody();
+},0);
+});
 }
 function reindex(){
-  const box = document.getElementById('editBox');
-  [...box.children].forEach((c,i)=>{ c.dataset.i=i; if(!c.firstChild) c.appendChild(document.createTextNode('')); });
+const box = document.getElementById('editBox');
+[...box.children].forEach((c,i)=>{ c.dataset.i=i; if(!c.firstChild) c.appendChild(document.createTextNode('')); });
 }
-/* 打开文章：先重绘，再绑定一次行级事件（后续输入不再重绑） */
 function openArticle(fid,aid){
-  editCtx.fid=fid; editCtx.aid=aid;
-  const a = article(fid,aid);
-  document.getElementById('editFolderName').innerHTML = `${esc(folder(fid).name)}<small>自动保存中</small>`;
-  document.getElementById('editTitle').value = a.name||'';
-  renderEditBox(a.body||'');
-  reindex(); bindEditLines();
-  document.getElementById('listView').style.display='none';
-  document.getElementById('editView').style.display='block';
-  document.getElementById('reviewView').style.display='none';
-  window.scrollTo(0,0);
+editCtx.fid=fid; editCtx.aid=aid;
+const a = article(fid,aid);
+document.getElementById('editFolderName').innerHTML = `${esc(folder(fid).name)}<small>自动保存中</small>`;
+document.getElementById('editTitle').value = a.name||'';
+renderEditBox(a.body||'');
+reindex(); bindEditLines();
+document.getElementById('listView').style.display='none';
+document.getElementById('editView').style.display='block';
+document.getElementById('reviewView').style.display='none';
+window.scrollTo(0,0);
 }
-
 /* =========================================================
-   复习
+复习
 ========================================================= */
 let revCtx = { fid:null, aid:null, revealed:0, total:0 };
 function openReview(fid,aid){
-  const a = article(fid,aid);
-  if(!a){ toast('文章不见了'); return; }
-  // 有字就能复习：没有 // 红段就整篇当“揭示式自测”，进度显示 0 个红块
-  commitBody();                     // 进复习前把最后一次输入落盘
-  revCtx.fid=fid; revCtx.aid=aid; revCtx.revealed=0;
-  document.getElementById('revTitle').textContent = a.name||'复习';
-  const card = document.getElementById('revCard');
-  const paras = parseBody(a.body||'');
-  revCtx.total = paras.filter(p=>p.red).length;
-  card.innerHTML = paras.map(p=>{
-    if(!p.red) return `<div>${esc(p.text)||'&nbsp;'}</div>`;
-    return `<span class="mask" data-rev="0">${esc(p.text)}</span>`;
-  }).join('') || `<div class="hint" style="padding:26px 4px;text-align:center;">这篇还没有 <b>//</b> 红段，先把要背的句子用 // 标出来再来自测吧 ✍️</div>`;
-  card.querySelectorAll('.mask').forEach(m=>{
-    m.addEventListener('click',()=>{
-      const was = m.dataset.rev==='1';
-      m.dataset.rev = was?'0':'1';
-      m.classList.toggle('reveal', !was);
-      revCtx.revealed += was?-1:1;
-      updateRevPill();
-    });
-  });
-  updateRevPill();
-  document.getElementById('listView').style.display='none';
-  document.getElementById('editView').style.display='none';
-  document.getElementById('reviewView').style.display='block';
-  window.scrollTo(0,0);
+const a = article(fid,aid);
+if(!a){ toast('文章不见了'); return; }
+commitBody();
+revCtx.fid=fid; revCtx.aid=aid; revCtx.revealed=0;
+document.getElementById('revTitle').textContent = a.name||'复习';
+const card = document.getElementById('revCard');
+const paras = parseBody(a.body||'');
+revCtx.total = paras.filter(p=>p.red).length;
+card.innerHTML = paras.map(p=>{
+if(!p.red) return `<div>${esc(p.text)||'&nbsp;'}</div>`;
+return `<span class="mask" data-rev="0">${esc(p.text)}</span>`;
+}).join('') || `<div class="hint" style="padding:26px 4px;text-align:center;">这篇还没有 <b>//</b> 红段，先把要背的句子用 // 标出来再来自测吧 ✍️</div>`;
+card.querySelectorAll('.mask').forEach(m=>{
+m.addEventListener('click',()=>{
+const was = m.dataset.rev==='1';
+m.dataset.rev = was?'0':'1';
+m.classList.toggle('reveal', !was);
+revCtx.revealed += was?-1:1;
+updateRevPill();
+});
+});
+updateRevPill();
+document.getElementById('listView').style.display='none';
+document.getElementById('editView').style.display='none';
+document.getElementById('reviewView').style.display='block';
+window.scrollTo(0,0);
 }
 function updateRevPill(){
-  const p = document.getElementById('revPill');
-  p.textContent = `${revCtx.revealed} / ${revCtx.total} 已揭开`;
-  p.classList.toggle('g', revCtx.total>0 && revCtx.revealed===revCtx.total);
+const p = document.getElementById('revPill');
+p.textContent = `${revCtx.revealed} / ${revCtx.total} 已揭开`;
+p.classList.toggle('g', revCtx.total>0 && revCtx.revealed===revCtx.total);
 }
 function finishReview(){
-  const a = article(revCtx.fid,revCtx.aid);
-  if(a.lastReview===today()){
-    toast('今天已经 +1 过啦，明天再来 ✨');
-  }else{
-    a.proficiency = (+a.proficiency||0)+1;
-    a.lastReview = today();
-    save(); toast('熟练度 +1，继续保持 🌱');
-  }
-  backToList();
+const a = article(revCtx.fid,revCtx.aid);
+if(a.lastReview===today()){
+toast('今天已经 +1 过啦，明天再来 ✨');
+}else{
+a.proficiency = (+a.proficiency||0)+1;
+a.lastReview = today();
+save(); toast('熟练度 +1，继续保持 🌱');
 }
-
+backToList();
+}
 /* =========================================================
-   弹窗：新建/重命名+换图标 文件夹，删除确认
-   文件夹右上角菜单里，「重命名」和「换图标」合并为一个「编辑」按钮，
-   点击后打开同一张表单（同时含名称输入框和图标网格）。
+弹窗：新建/重命名+换图标 文件夹，删除确认
 ========================================================= */
 function showSheet(title, html){
-  document.getElementById('sheetTitle').textContent = title;
-  document.getElementById('sheetBody').innerHTML = html;
-  document.getElementById('scrim').style.display='flex';
+document.getElementById('sheetTitle').textContent = title;
+document.getElementById('sheetBody').innerHTML = html;
+document.getElementById('scrim').style.display='flex';
 }
 function closeSheet(){ document.getElementById('scrim').style.display='none'; try{ document.activeElement&&document.activeElement.blur(); }catch(e){} }
 function folderQuickMenu(fid){
-  const f = folder(fid); if(!f) return;
-  showSheet('文件夹 · ' + f.name, `
-    <div class="fmenu-preview">
-      <div class="emoji-lg">${f.emoji}</div>
-      <div class="fmenu-meta">${f.articles.length} 篇 · 平均熟练 ${avgProf(f)}</div>
-    </div>
-    <div class="acts col">
-      <button class="btn plain left" id="fmEdit">
-        <svg viewBox="0 0 24 24" width="17" height="17" stroke="currentColor" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20h4l10-10-4-4L4 16z"/><path d="M14 6l4 4"/></svg>
-        重命名 / 换图标
-      </button>
-      <button class="btn danger left" id="fmDel">
-        <svg viewBox="0 0 24 24" width="17" height="17" stroke="currentColor" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13"/></svg>
-        删除文件夹
-      </button>
-    </div>`);
-  document.getElementById('fmEdit').onclick = ()=>{ closeSheet(); sheetFolder(fid); };
-  document.getElementById('fmDel').onclick = ()=>{
-    closeSheet();
-    confirmDel('确定删除文件夹 <b>'+esc(f.name)+'</b> 及其中的 '+f.articles.length+' 篇文章吗？删除后无法恢复。', ()=>{
-      store.folders = store.folders.filter(x=>x.id!==fid);
-      save(); renderFolders();
-      try{ navigator.vibrate && navigator.vibrate(10); }catch(e){}
-    });
-  };
+const f = folder(fid); if(!f) return;
+showSheet('文件夹 · ' + f.name, `
+<div class="fmenu-preview">
+<div class="emoji-lg">${f.emoji}</div>
+<div class="fmenu-meta">${f.articles.length} 篇 · 平均熟练 ${avgProf(f)}</div>
+</div>
+<div class="acts col">
+<button class="btn plain left" id="fmEdit">
+<svg viewBox="0 0 24 24" width="17" height="17" stroke="currentColor" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20h4l10-10-4-4L4 16z"/><path d="M14 6l4 4"/></svg>
+重命名 / 换图标
+</button>
+<button class="btn danger left" id="fmDel">
+<svg viewBox="0 0 24 24" width="17" height="17" stroke="currentColor" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13"/></svg>
+删除文件夹
+</button>
+</div>`);
+document.getElementById('fmEdit').onclick = ()=>{ closeSheet(); sheetFolder(fid); };
+document.getElementById('fmDel').onclick = ()=>{
+closeSheet();
+confirmDel('确定删除文件夹 <b>'+esc(f.name)+'</b> 及其中的 '+f.articles.length+' 篇文章吗？删除后无法恢复。', ()=>{
+store.folders = store.folders.filter(x=>x.id!==fid);
+save(); renderFolders();
+try{ navigator.vibrate && navigator.vibrate(10); }catch(e){}
+});
+};
 }
-
-/* sheetFolder：一张表单同时支持「重命名 + 换图标」，
-   新建 / 编辑共用。编辑时弹窗标题为「编辑文件夹」。 */
 function sheetFolder(fid){
-  const f = fid ? folder(fid) : { name:'', emoji:'📖' };
-  const emo = EMOJIS.map(e=>`<button class="${e===f.emoji?'on':''}" data-e="${e}">${e}</button>`).join('');
-  showSheet(fid?'编辑文件夹':'新建文件夹', `
-    <div class="field" style="margin-bottom:14px;">
-      <label>名称</label>
-      <input id="fName" maxlength="30" value="${esc(f.name)}" placeholder="比如：考研单词 / 古诗文">
-    </div>
-    <div class="field">
-      <label>图标</label>
-      <div class="emoji-grid" id="emoGrid">${emo}</div>
-    </div>
-    <div class="acts">
-      <button class="btn plain" id="sheetCancel">取消</button>
-      <button class="btn" id="sheetSave">${fid?'保存':'创建'}</button>
-    </div>
-  `);
-  let pick = f.emoji;
-  document.querySelectorAll('#emoGrid button').forEach(b=>b.onclick=()=>{
-    pick=b.dataset.e;
-    document.querySelectorAll('#emoGrid button').forEach(x=>x.classList.remove('on'));
-    b.classList.add('on');
-  });
-  document.getElementById('sheetCancel').onclick = closeSheet;
-  document.getElementById('sheetSave').onclick = ()=>{
-    const name = document.getElementById('fName').value.trim();
-    if(!name){ toast('给文件夹起个名字吧'); return; }
-    if(fid){ const x=folder(fid); x.name=name; x.emoji=pick; }
-    else { const nf = { id:uid(), name, emoji:pick, articles:[] };
-      store.folders.push(nf); }
-    save(); closeSheet(); renderFolders(); openFolder(curFolderId);
-  };
+const f = fid ? folder(fid) : { name:'', emoji:'📖' };
+const emo = EMOJIS.map(e=>`<button class="${e===f.emoji?'on':''}" data-e="${e}">${e}</button>`).join('');
+showSheet(fid?'编辑文件夹':'新建文件夹', `
+<div class="field" style="margin-bottom:14px;">
+<label>名称</label>
+<input id="fName" maxlength="30" value="${esc(f.name)}" placeholder="比如：考研单词 / 古诗文">
+</div>
+<div class="field">
+<label>图标</label>
+<div class="emoji-grid" id="emoGrid">${emo}</div>
+</div>
+<div class="acts">
+<button class="btn plain" id="sheetCancel">取消</button>
+<button class="btn" id="sheetSave">${fid?'保存':'创建'}</button>
+</div>
+`);
+let pick = f.emoji;
+document.querySelectorAll('#emoGrid button').forEach(b=>b.onclick=()=>{
+pick=b.dataset.e;
+document.querySelectorAll('#emoGrid button').forEach(x=>x.classList.remove('on'));
+b.classList.add('on');
+});
+document.getElementById('sheetCancel').onclick = closeSheet;
+document.getElementById('sheetSave').onclick = ()=>{
+const name = document.getElementById('fName').value.trim();
+if(!name){ toast('给文件夹起个名字吧'); return; }
+if(fid){ const x=folder(fid); x.name=name; x.emoji=pick; }
+else { const nf = { id:uid(), name, emoji:pick, articles:[] };
+store.folders.push(nf); }
+save(); closeSheet(); renderFolders(); openFolder(curFolderId);
+};
 }
 function sheetArticle(fid,aid){
-  const a = aid ? article(fid,aid) : { name:'' };
-  showSheet(aid?'重命名文章':'新建文章', `
-    <div class="field">
-      <label>文章名称</label>
-      <input id="aName" maxlength="60" value="${esc(a.name)}" placeholder="比如：滕王阁序第一段">
-    </div>
-    <div class="warn" id="aWarn">名称不能为空</div>
-    <div class="acts">
-      <button class="btn plain" id="sheetCancel">取消</button>
-      <button class="btn" id="sheetSave">${aid?'保存':'创建'}</button>
-    </div>
-  `);
-  const inp = document.getElementById('aName');
-  const warn = document.getElementById('aWarn');
-  document.getElementById('sheetCancel').onclick = closeSheet;
-  document.getElementById('sheetSave').onclick = ()=>{
-    const name = inp.value.trim();
-    if(!name){ warn.style.display='block'; return; }
-    if(aid){ const x=article(fid,aid); x.name=name; }
-    else {
-      const f=folder(fid);
-      const na = { id:uid(), name, body:'', proficiency:0, lastReview:'', created:today() };
-      f.articles.unshift(na);
-      save(); closeSheet(); renderArticles();
-      toast('已创建「'+name+'」'); return;
-    }
-    save(); closeSheet(); renderArticles();
-  };
+const a = aid ? article(fid,aid) : { name:'' };
+showSheet(aid?'重命名文章':'新建文章', `
+<div class="field">
+<label>文章名称</label>
+<input id="aName" maxlength="60" value="${esc(a.name)}" placeholder="比如：滕王阁序第一段">
+</div>
+<div class="warn" id="aWarn">名称不能为空</div>
+<div class="acts">
+<button class="btn plain" id="sheetCancel">取消</button>
+<button class="btn" id="sheetSave">${aid?'保存':'创建'}</button>
+</div>
+`);
+const inp = document.getElementById('aName');
+const warn = document.getElementById('aWarn');
+document.getElementById('sheetCancel').onclick = closeSheet;
+document.getElementById('sheetSave').onclick = ()=>{
+const name = inp.value.trim();
+if(!name){ warn.style.display='block'; return; }
+if(aid){ const x=article(fid,aid); x.name=name; }
+else {
+const f=folder(fid);
+const na = { id:uid(), name, body:'', proficiency:0, lastReview:'', created:today() };
+f.articles.unshift(na);
+save(); closeSheet(); renderArticles();
+toast('已创建「'+name+'」'); return;
+}
+save(); closeSheet(); renderArticles();
+};
 }
 function confirmDel(msg, onYes){
-  showSheet('确认删除', `
-    <div style="color:var(--ink-2);font-size:14px;line-height:1.7;">${msg}</div>
-    <div class="acts">
-      <button class="btn plain" id="sheetCancel">取消</button>
-      <button class="btn danger" id="sheetSave">删除</button>
-    </div>`);
-  document.getElementById('sheetCancel').onclick = closeSheet;
-  document.getElementById('sheetSave').onclick = ()=>{ closeSheet(); onYes(); };
+showSheet('确认删除', `
+<div style="color:var(--ink-2);font-size:14px;line-height:1.7;">${msg}</div>
+<div class="acts">
+<button class="btn plain" id="sheetCancel">取消</button>
+<button class="btn danger" id="sheetSave">删除</button>
+</div>`);
+document.getElementById('sheetCancel').onclick = closeSheet;
+document.getElementById('sheetSave').onclick = ()=>{ closeSheet(); onYes(); };
 }
-
 /* =========================================================
-   导航
+导航
 ========================================================= */
 function backToList(){
-  // 退出编辑器时自动保存（先 commit，再切页），确保内容不丢失
-  try{ commitBody(); }catch(e){}
-  document.getElementById('folderList').closest('.wrap').style.display='none';
-  document.getElementById('listView').style.display='block';
-  document.getElementById('editView').style.display='none';
-  document.getElementById('reviewView').style.display='none';
-  ctx.selecting=false; ctx.sel.clear();
-  renderArticles();
-  const f=folder(ctx.fid);
-  if(f) document.getElementById('listTitle').innerHTML = `${esc(f.name)}<small>${f.emoji} · ${f.articles.length} 篇</small>`;
+try{ commitBody(); }catch(e){}
+document.getElementById('folderList').closest('.wrap').style.display='none';
+document.getElementById('listView').style.display='block';
+document.getElementById('editView').style.display='none';
+document.getElementById('reviewView').style.display='none';
+ctx.selecting=false; ctx.sel.clear();
+renderArticles();
+const f=folder(ctx.fid);
+if(f) document.getElementById('listTitle').innerHTML = `${esc(f.name)}<small>${f.emoji} · ${f.articles.length} 篇</small>`;
 }
 function backToHome(){
-  editCtx.dirty=false;
-  document.getElementById('folderList').closest('.wrap').style.display='block';
-  document.getElementById('listView').style.display='none';
-  document.getElementById('editView').style.display='none';
-  document.getElementById('reviewView').style.display='none';
-  renderFolders();
+editCtx.dirty=false;
+document.getElementById('folderList').closest('.wrap').style.display='block';
+document.getElementById('listView').style.display='none';
+document.getElementById('editView').style.display='none';
+document.getElementById('reviewView').style.display='none';
+renderFolders();
 }
-
 /* =========================================================
-   事件绑定
+事件绑定
 ========================================================= */
 document.addEventListener('DOMContentLoaded',()=>{
-  load(); renderFolders();
-  // 标签页隐藏 / 切到后台时再落一次盘，兜底“直接关掉就没了”的极端情况
-  document.addEventListener('visibilitychange',()=>{ if(document.hidden){ persist(); } else { load(); renderFolders(); } });
-  window.addEventListener('pagehide',()=>persist());
-  window.addEventListener('beforeunload',()=>persist());
-
-  /* 主页：文件夹交互
-      · 点卡片任意处（含图标、名字）→ 直接进入文章列表
-      · 点右上角三点 → 弹出菜单：编辑（重命名+换图标）/ 删除 */
-  document.getElementById('folderList').addEventListener('click',e=>{
-    const card = e.target.closest('.folder');
-    if(!card || card.id==='addFolder'){
-      if(card && card.id==='addFolder') sheetFolder();
-      return;
-    }
-    const fid = card.dataset.fid;
-    if(e.target.closest('[data-act="menu"]')){ e.stopPropagation(); folderQuickMenu(fid); return; }
-    setCurFolder(fid); openFolder(fid, true);
-  });
-
-  /* 文章列表 */
-  document.getElementById('listBack').onclick = backToHome;
-  document.getElementById('fabNew').onclick = ()=> sheetArticle(ctx.fid);
-  document.getElementById('listSelect').onclick = ()=>{
-    ctx.selecting=!ctx.selecting; if(!ctx.selecting) ctx.sel.clear();
-    renderArticles();
-  };
-  document.getElementById('batchCancel').onclick = ()=>{ ctx.selecting=false; ctx.sel.clear(); renderArticles(); };
-  document.getElementById('batchDel').onclick = ()=>{
-    if(!ctx.sel.size){ toast('还没选文章哦'); return; }
-    confirmDel(`确定删除选中的 <b>${ctx.sel.size}</b> 篇文章吗？删除后无法恢复。`, ()=>{
-      const f=folder(ctx.fid);
-      f.articles = f.articles.filter(a=>!ctx.sel.has(a.id));
-      save(); ctx.selecting=false; ctx.sel.clear(); renderArticles(); renderFolders();
-      if(!f.articles.length) backToHome();
-    });
-  };
-  document.getElementById('sortSeg').addEventListener('click',e=>{
-    const b=e.target.closest('button'); if(!b) return;
-    document.querySelectorAll('#sortSeg button').forEach(x=>x.classList.remove('on'));
-    b.classList.add('on'); ctx.sort=b.dataset.sort; renderArticles();
-  });
-  document.getElementById('searchInput').addEventListener('input',e=>{ ctx.kw=e.target.value; renderArticles(); });
-  document.getElementById('articleList').addEventListener('click',e=>{
-    const row = e.target.closest('.article'); if(!row) return;
-    const aid = row.dataset.aid;
-    if(ctx.selecting){
-      // 多选模式下：点整行 / 点圆圈 都切换，不再进入文章
-      if(ctx.sel.has(aid)) ctx.sel.delete(aid); else ctx.sel.add(aid);
-      renderArticles();
-      return;
-    }
-    // 非多选：点圆圈直接进多选并选中这一篇，点别处正常打开文章
-    if(e.target.closest('.chk')){ ctx.selecting=true; ctx.sel.add(aid); renderArticles(); return; }
-    openArticle(ctx.fid,aid);
-  });
-  // 长按文章卡也进入多选（移动端更顺手）
-  let pressTimer=null, pressMoved=false;
-  document.getElementById('articleList').addEventListener('touchstart',e=>{
-    const row=e.target.closest('.article'); if(!row || ctx.selecting) return;
-    pressMoved=false;
-    pressTimer=setTimeout(()=>{ if(!pressMoved){ ctx.selecting=true; ctx.sel.add(row.dataset.aid); renderArticles();
-      try{ navigator.vibrate && navigator.vibrate(15); }catch(e){} } },550);
-  },{passive:true});
-  document.getElementById('articleList').addEventListener('touchmove',()=>{ pressMoved=true; clearTimeout(pressTimer); },{passive:true});
-  document.getElementById('articleList').addEventListener('touchend',()=>clearTimeout(pressTimer),{passive:true});
-  document.getElementById('articleList').addEventListener('touchcancel',()=>clearTimeout(pressTimer),{passive:true});
-
-  /* 编辑器 */
-  document.getElementById('editBack').onclick = backToList;
-  document.getElementById('editTitle').addEventListener('input',()=>{ commitBody(); });
-  document.getElementById('enterReview').onclick = ()=> openReview(editCtx.fid,editCtx.aid);
-
-  /* 复习 */
-  document.getElementById('revBack').onclick = ()=>{
-    commitBody(); backToList();
-  };
-  document.getElementById('revDone').onclick = finishReview;
-
-  /* 导入导出 */
-  document.getElementById('btnExport').onclick = exportData;
-  document.getElementById('btnImport').onclick = ()=> document.getElementById('importFile').click();
+load(); renderFolders();
+document.addEventListener('visibilitychange',()=>{ if(document.hidden){ persist(); } else { load(); renderFolders(); } });
+window.addEventListener('pagehide',()=>persist());
+window.addEventListener('beforeunload',()=>persist());
+document.getElementById('folderList').addEventListener('click',e=>{
+const card = e.target.closest('.folder');
+if(!card || card.id==='addFolder'){
+if(card && card.id==='addFolder') sheetFolder();
+return;
+}
+const fid = card.dataset.fid;
+if(e.target.closest('[data-act="menu"]')){ e.stopPropagation(); folderQuickMenu(fid); return; }
+setCurFolder(fid); openFolder(fid, true);
 });
-
-/* 点击弹窗外关闭 */
+document.getElementById('listBack').onclick = backToHome;
+document.getElementById('fabNew').onclick = ()=> sheetArticle(ctx.fid);
+document.getElementById('listSelect').onclick = ()=>{
+ctx.selecting=!ctx.selecting; if(!ctx.selecting) ctx.sel.clear();
+renderArticles();
+};
+document.getElementById('batchCancel').onclick = ()=>{ ctx.selecting=false; ctx.sel.clear(); renderArticles(); };
+document.getElementById('batchDel').onclick = ()=>{
+if(!ctx.sel.size){ toast('还没选文章哦'); return; }
+confirmDel(`确定删除选中的 <b>${ctx.sel.size}</b> 篇文章吗？删除后无法恢复。`, ()=>{
+const f=folder(ctx.fid);
+f.articles = f.articles.filter(a=>!ctx.sel.has(a.id));
+save(); ctx.selecting=false; ctx.sel.clear(); renderArticles(); renderFolders();
+if(!f.articles.length) backToHome();
+});
+};
+document.getElementById('sortSeg').addEventListener('click',e=>{
+const b=e.target.closest('button'); if(!b) return;
+document.querySelectorAll('#sortSeg button').forEach(x=>x.classList.remove('on'));
+b.classList.add('on'); ctx.sort=b.dataset.sort; renderArticles();
+});
+document.getElementById('searchInput').addEventListener('input',e=>{ ctx.kw=e.target.value; renderArticles(); });
+document.getElementById('articleList').addEventListener('click',e=>{
+const row = e.target.closest('.article'); if(!row) return;
+const aid = row.dataset.aid;
+if(ctx.selecting){
+if(ctx.sel.has(aid)) ctx.sel.delete(aid); else ctx.sel.add(aid);
+renderArticles();
+return;
+}
+if(e.target.closest('.chk')){ ctx.selecting=true; ctx.sel.add(aid); renderArticles(); return; }
+openArticle(ctx.fid,aid);
+});
+let pressTimer=null, pressMoved=false;
+document.getElementById('articleList').addEventListener('touchstart',e=>{
+const row=e.target.closest('.article'); if(!row || ctx.selecting) return;
+pressMoved=false;
+pressTimer=setTimeout(()=>{ if(!pressMoved){ ctx.selecting=true; ctx.sel.add(row.dataset.aid); renderArticles();
+try{ navigator.vibrate && navigator.vibrate(15); }catch(e){} } },550);
+},{passive:true});
+document.getElementById('articleList').addEventListener('touchmove',()=>{ pressMoved=true; clearTimeout(pressTimer); },{passive:true});
+document.getElementById('articleList').addEventListener('touchend',()=>clearTimeout(pressTimer),{passive:true});
+document.getElementById('articleList').addEventListener('touchcancel',()=>clearTimeout(pressTimer),{passive:true});
+document.getElementById('editBack').onclick = backToList;
+document.getElementById('editTitle').addEventListener('input',()=>{ commitBody(); });
+document.getElementById('enterReview').onclick = ()=> openReview(editCtx.fid,editCtx.aid);
+document.getElementById('revBack').onclick = ()=>{
+commitBody(); backToList();
+};
+document.getElementById('revDone').onclick = finishReview;
+document.getElementById('btnExport').onclick = exportData;
+document.getElementById('btnImport').onclick = ()=> document.getElementById('importFile').click();
+});
 document.getElementById('scrim').addEventListener('click',e=>{ if(e.target.id==='scrim') closeSheet(); });
-
 /* =========================================================
-   导入 / 导出
+导入 / 导出
 ========================================================= */
 function exportData(){
-  const blob = new Blob([JSON.stringify(store,null,2)], {type:'application/json'});
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url;
-  a.download = `背诵本备份_${today()}.json`;
-  document.body.appendChild(a); a.click(); a.remove();
-  URL.revokeObjectURL(url);
-  toast('已导出备份文件 ✔');
+const blob = new Blob([JSON.stringify(store,null,2)], {type:'application/json'});
+const url = URL.createObjectURL(blob);
+const a = document.createElement('a');
+a.href = url;
+a.download = `背诵本备份_${today()}.json`;
+document.body.appendChild(a); a.click(); a.remove();
+URL.revokeObjectURL(url);
+toast('已导出备份文件 ✔');
 }
 const importer = document.createElement('input');
 importer.type='file'; importer.accept='.json,application/json'; importer.id='importFile';
 Object.assign(importer.style,{position:'fixed',left:'-1000px',top:'-1000px',opacity:'0',width:'1px',height:'1px',padding:'0',border:'none',outline:'none'});
 importer.onchange = e=>{
-  const f = e.target.files[0]; if(!f) return;
-  const r = new FileReader();
-  r.onload = ()=>{
-    try{
-      const data = JSON.parse(r.result);
-      if(!data || !Array.isArray(data.folders)) throw 0;
-      data = normalize(data);
-      showSheet('导入备份', `
-        <div style="color:var(--ink-2);font-size:14px;line-height:1.8;">
-          即将导入 <b>${data.folders.length}</b> 个文件夹、<b>${data.folders.reduce((s,x)=>s+(x.articles||[]).length,0)}</b> 篇文章。<br>
-          选择导入方式：
-        </div>
-        <div class="acts" style="flex-direction:column;align-items:stretch;">
-          <button class="btn" id="impMerge">合并到现有内容</button>
-          <button class="btn danger" id="impReplace">清空后导入（会覆盖当前数据）</button>
-          <button class="btn plain" id="sheetCancel">取消</button>
-        </div>`);
-      document.getElementById('sheetCancel').onclick = closeSheet;
-      document.getElementById('impMerge').onclick = ()=>{ mergeImport(data); closeSheet(); };
-      document.getElementById('impReplace').onclick = ()=>{ replaceImport(data); closeSheet(); };
-    }catch(err){ toast('文件格式不对，导入失败'); }
-    e.target.value='';
-  };
-  r.readAsText(f,'utf-8');
+const fileInput = e.target;
+const f = fileInput.files[0]; if(!f) return;
+const r = new FileReader();
+r.onload = ()=>{
+try{
+// 修复：去除可能的 UTF-8 BOM 和首尾空格，防止 JSON.parse 失败
+let raw = (r.result || '').toString().trim();
+if(raw.charCodeAt(0) === 0xFEFF) raw = raw.slice(1);
+if(!raw) throw 0;
+const data = JSON.parse(raw);
+if(!data || !Array.isArray(data.folders)) throw 0;
+const normalized = normalize(data);
+// 修复：提前计算文章总数，避免模板字符串中 reduce 出错被误捕获
+const folderCount = normalized.folders.length;
+const articleCount = Array.isArray(normalized.folders) ? normalized.folders.reduce((s,x)=>s+(Array.isArray(x.articles)?x.articles.length:0),0) : 0;
+showSheet('导入备份', `
+<div style="color:var(--ink-2);font-size:14px;line-height:1.8;">
+即将导入 <b>${folderCount}</b> 个文件夹、<b>${articleCount}</b> 篇文章。<br>
+选择导入方式：
+</div>
+<div class="acts" style="flex-direction:column;align-items:stretch;">
+<button class="btn" id="impMerge">合并到现有内容</button>
+<button class="btn danger" id="impReplace">清空后导入（会覆盖当前数据）</button>
+<button class="btn plain" id="sheetCancel">取消</button>
+</div>`);
+document.getElementById('sheetCancel').onclick = closeSheet;
+document.getElementById('impMerge').onclick = ()=>{ mergeImport(normalized); closeSheet(); };
+document.getElementById('impReplace').onclick = ()=>{ replaceImport(normalized); closeSheet(); };
+}catch(err){ toast('文件格式不对，导入失败'); }
+fileInput.value='';
+};
+r.readAsText(f,'utf-8');
 };
 document.body.appendChild(importer);
-
 function normalizeImport(data){
-  return normalize(data);
+return normalize(data);
 }
 function mergeImport(data){
-  data = normalizeImport(data,true); persist();
-  store.folders = store.folders.concat(data.folders);
-  save(); backToHome(); renderFolders(); toast(`已合并 ${data.folders.length} 个文件夹 ✔`);
+data = normalizeImport(data,true); persist();
+store.folders = store.folders.concat(data.folders);
+save(); backToHome(); renderFolders(); toast(`已合并 ${data.folders.length} 个文件夹 ✔`);
 }
 function replaceImport(data){
-  data = normalizeImport(data,true);
-  store = data; persist(); backToHome(); renderFolders(); toast('已导入并替换当前数据 ✔');
+data = normalizeImport(data,true);
+store = data; persist(); backToHome(); renderFolders(); toast('已导入并替换当前数据 ✔');
 }
-
 let toastTimer;
 function toast(msg){
-  const t = document.createElement('div');
-  t.className='toast'; t.textContent=msg;
-  document.body.appendChild(t);
-  clearTimeout(toastTimer);
-  toastTimer = setTimeout(()=>{ t.remove(); },1800);
+const t = document.createElement('div');
+t.className='toast'; t.textContent=msg;
+document.body.appendChild(t);
+clearTimeout(toastTimer);
+toastTimer = setTimeout(()=>{ t.remove(); },1800);
 }
 </script>
 </body>
