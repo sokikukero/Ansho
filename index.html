@@ -92,7 +92,6 @@ transition:.15s;
 }
 .folder .fmenu:active{background:var(--brand-soft);color:var(--brand);transform:scale(.92);}
 .folder .fmenu svg{width:17px;height:17px;}
-/* 菜单里的整行按钮 */
 .acts.col{display:flex;flex-direction:column;gap:10px;margin-top:6px;}
 .acts .left{justify-content:flex-start;text-align:left;width:100%;}
 .fmenu-preview{display:flex;align-items:center;gap:14px;margin-bottom:18px;padding:10px 12px;
@@ -292,7 +291,7 @@ animation:fade .25s ease;
 </div>
 <div class="editor">
 <input class="etitle" id="editTitle" placeholder="文章标题">
-<div class="hint">以 <b>//</b> 开头的自然段会被标红；复习时会变成红块遮住，点一下揭开。</div>
+<div class="hint">在任意位置输入 <b>//</b>，其后面的内容会被标红；复习时会变成红块遮住，点一下揭开。</div>
 <div class="ed-box" id="editBox" contenteditable="true" spellcheck="false"></div>
 </div>
 </div>
@@ -412,6 +411,7 @@ document.getElementById('listView').style.display='block';
 document.getElementById('editView').style.display='none';
 document.getElementById('reviewView').style.display='none';
 const f = folder(fid);
+if(!f){ document.getElementById('listTitle').innerHTML = `该文件夹已不存在<small>请返回主页</small>`; document.getElementById('articleList').innerHTML=''; return; }
 document.getElementById('listTitle').innerHTML = `${esc(f.name)}<small>${f.emoji} · ${f.articles.length} 篇</small>`;
 document.getElementById('listCount').textContent='';
 renderArticles();
@@ -421,6 +421,7 @@ function folder(fid){ return store.folders.find(f=>f.id===fid); }
 function article(fid,aid){ const f=folder(fid); return f&&f.articles.find(a=>a.id===aid); }
 function renderArticles(){
 const f = folder(ctx.fid);
+if(!f){ document.getElementById('articleList').innerHTML=''; return; }
 const kw = ctx.kw.trim().toLowerCase();
 let list = f.articles.filter(a=> !kw || (a.name||'').toLowerCase().includes(kw));
 const s = ctx.sort;
@@ -462,10 +463,16 @@ return `${d[0]}.${d[1]}.${d[2]}`;
 let editCtx = { fid:null, aid:null, dirty:false };
 function renderEditBox(body){
 const box = document.getElementById('editBox');
-const paras = parseBody(body);
-const html = paras.map((pp,i)=>{
-const txt = esc(pp.text);
-return `<div class="${pp.red?'hl':''}" data-i="${i}">${txt||'&nbsp;'}</div>`;
+const lines = (body||'').split('\n');
+const html = lines.map((ln,i)=>{
+const idx = ln.indexOf('//');
+if (idx === -1) {
+return `<div data-i="${i}">${esc(ln)||'&nbsp;'}</div>`;
+} else {
+const before = ln.slice(0, idx);
+const after = ln.slice(idx);
+return `<div data-i="${i}">${esc(before)}<span class="hl">${esc(after)}</span></div>`;
+}
 }).join('');
 box.innerHTML = html || '<div data-i="0">&nbsp;</div>';
 }
@@ -480,12 +487,70 @@ a.body = readLines().join('\n');
 a.name = document.getElementById('editTitle').value.trim() || '无标题';
 save();
 }
-function parseBody(body){
-return (body||'').split('\n').map(ln=>({ text:ln, red:/^\s*\/\//.test(ln) }));
+function updateLine(el){
+let lineEl = el;
+if (lineEl.nodeType === Node.TEXT_NODE) lineEl = lineEl.parentNode;
+if (!lineEl.dataset || !('i' in lineEl.dataset)) {
+lineEl = lineEl.closest('[data-i]');
 }
-function markLine(el){
-const on = /^\s*\/\//.test(el.textContent||'');
-if(on !== el.classList.contains('hl')) el.classList.toggle('hl', on);
+if (!lineEl) return;
+const text = lineEl.textContent;
+const idx = text.indexOf('//');
+if (idx === -1) {
+if (lineEl.querySelector('span.hl')) {
+lineEl.innerHTML = esc(text) || '&nbsp;';
+}
+return;
+}
+const before = text.slice(0, idx);
+const after = text.slice(idx);
+const newHtml = `${esc(before)}<span class="hl">${esc(after)}</span>`;
+if (lineEl.innerHTML !== newHtml) {
+const sel = window.getSelection();
+let charIndex = 0;
+if (sel && sel.rangeCount > 0) {
+const rng = sel.getRangeAt(0);
+if (lineEl.contains(rng.startContainer)) {
+const walker = document.createTreeWalker(lineEl, NodeFilter.SHOW_TEXT, null, false);
+let node;
+while ((node = walker.nextNode())) {
+if (node === rng.startContainer) {
+charIndex += rng.startOffset;
+break;
+}
+charIndex += node.nodeValue.length;
+}
+}
+}
+lineEl.innerHTML = newHtml;
+if (sel && lineEl.contains(sel.anchorNode || lineEl)) {
+const walker = document.createTreeWalker(lineEl, NodeFilter.SHOW_TEXT, null, false);
+let node, current = 0;
+let restored = false;
+while ((node = walker.nextNode())) {
+if (current + node.nodeValue.length >= charIndex) {
+const r = document.createRange();
+r.setStart(node, charIndex - current);
+r.collapse(true);
+sel.removeAllRanges();
+sel.addRange(r);
+restored = true;
+break;
+}
+current += node.nodeValue.length;
+}
+if (!restored && charIndex === 0) {
+const r = document.createRange();
+const first = lineEl.firstChild;
+if (first) {
+r.setStart(first, 0);
+r.collapse(true);
+sel.removeAllRanges();
+sel.addRange(r);
+}
+}
+}
+}
 }
 function saveCaret(){
 const sel = window.getSelection();
@@ -514,23 +579,31 @@ function bindEditLines(){
 const box = document.getElementById('editBox');
 if(!box || box.dataset.bound) return; box.dataset.bound='1';
 box.addEventListener('input', e=>{
-const t = e.target;
-if(t && t.dataset && 'i' in t.dataset){ markLine(t); commitBody(); }
+let t = e.target;
+if(t && t.nodeType === Node.TEXT_NODE) t = t.parentNode;
+if(t && (!t.dataset || !('i' in t.dataset))) t = t.closest('[data-i]');
+if(t){ updateLine(t); commitBody(); }
 });
 box.addEventListener('compositionend', e=>{
-const t = e.target;
-if(t && t.dataset && 'i' in t.dataset){ markLine(t); commitBody(); }
+let t = e.target;
+if(t && t.nodeType === Node.TEXT_NODE) t = t.parentNode;
+if(t && (!t.dataset || !('i' in t.dataset))) t = t.closest('[data-i]');
+if(t){ updateLine(t); commitBody(); }
 });
 box.addEventListener('blur', ()=>commitBody(), true);
 box.addEventListener('keydown', e=>{
-const cur = e.target;
-if(!cur || !(cur.dataset && 'i' in cur.dataset)) return;
+let cur = e.target;
+if (cur && cur.nodeType === Node.TEXT_NODE) cur = cur.parentNode;
+if (!cur || !cur.dataset || !('i' in cur.dataset)) {
+cur = cur ? cur.closest('[data-i]') : null;
+}
+if (!cur) return;
 if(e.key==='Enter'){
 e.preventDefault();
 const idx = [...box.children].indexOf(cur);
 const nxt = document.createElement('div'); nxt.dataset.i='p';
-cur.after(nxt); markLine(cur); commitBody();
-reindex(); markLine(nxt); nxt.focus();
+cur.after(nxt); updateLine(cur); commitBody();
+reindex(); updateLine(nxt); nxt.focus();
 const rng=document.createRange(), sel=window.getSelection();
 const tn=nxt.firstChild||document.createTextNode('');
 if(!nxt.firstChild) nxt.appendChild(tn);
@@ -540,7 +613,7 @@ if(cur.textContent==='' || cur.textContent==='\u00a0'){
 const prev = cur.previousElementSibling;
 if(prev && box.children.length>1){
 e.preventDefault();
-cur.remove(); reindex(); markLine(prev); prev.focus(); commitBody();
+cur.remove(); reindex(); updateLine(prev); prev.focus(); commitBody();
 }
 }
 }
@@ -583,12 +656,21 @@ commitBody();
 revCtx.fid=fid; revCtx.aid=aid; revCtx.revealed=0;
 document.getElementById('revTitle').textContent = a.name||'复习';
 const card = document.getElementById('revCard');
-const paras = parseBody(a.body||'');
-revCtx.total = paras.filter(p=>p.red).length;
-card.innerHTML = paras.map(p=>{
-if(!p.red) return `<div>${esc(p.text)||'&nbsp;'}</div>`;
-return `<span class="mask" data-rev="0">${esc(p.text)}</span>`;
-}).join('') || `<div class="hint" style="padding:26px 4px;text-align:center;">这篇还没有 <b>//</b> 红段，先把要背的句子用 // 标出来再来自测吧 ✍️</div>`;
+const lines = (a.body||'').split('\n');
+let totalMasks = 0;
+const html = lines.map(ln=>{
+const idx = ln.indexOf('//');
+if (idx === -1) {
+return `<div>${esc(ln)||'&nbsp;'}</div>`;
+} else {
+const before = ln.slice(0, idx);
+const after = ln.slice(idx);
+totalMasks++;
+return `<div>${esc(before)}<span class="mask" data-rev="0">${esc(after)}</span></div>`;
+}
+}).join('');
+revCtx.total = totalMasks;
+card.innerHTML = html || `<div class="hint" style="padding:26px 4px;text-align:center;">这篇还没有 <b>//</b> 红段，先把要背的句子用 // 标出来再来自测吧 ✍️</div>`;
 card.querySelectorAll('.mask').forEach(m=>{
 m.addEventListener('click',()=>{
 const was = m.dataset.rev==='1';
@@ -845,14 +927,12 @@ const f = fileInput.files[0]; if(!f) return;
 const r = new FileReader();
 r.onload = ()=>{
 try{
-// 修复：去除可能的 UTF-8 BOM 和首尾空格，防止 JSON.parse 失败
 let raw = (r.result || '').toString().trim();
 if(raw.charCodeAt(0) === 0xFEFF) raw = raw.slice(1);
 if(!raw) throw 0;
 const data = JSON.parse(raw);
 if(!data || !Array.isArray(data.folders)) throw 0;
 const normalized = normalize(data);
-// 修复：提前计算文章总数，避免模板字符串中 reduce 出错被误捕获
 const folderCount = normalized.folders.length;
 const articleCount = Array.isArray(normalized.folders) ? normalized.folders.reduce((s,x)=>s+(Array.isArray(x.articles)?x.articles.length:0),0) : 0;
 showSheet('导入备份', `
